@@ -1,0 +1,91 @@
+-- -------------------------------------
+-- CRIACAO DO DATABASE OFICINA
+-- -------------------------------------
+CREATE DATABASE IF NOT EXISTS oficina;
+USE oficina;
+
+-- -------------------------------------
+-- CRIACAO DAS TABELAS
+-- -------------------------------------
+CREATE TABLE mecanico (
+						idMecanico INT AUTO_INCREMENT PRIMARY KEY,
+                        NomeMecanico VARCHAR (60) NOT NULL,
+                        CPFmecanico CHAR (9) NOT NULL,
+                        Especialidade VARCHAR (60) NOT NULL,
+                        contatoMecanico CHAR (11) NOT NULL
+                        );
+                        
+                        
+CREATE TABLE servicos (
+						idServico INT AUTO_INCREMENT PRIMARY KEY,
+                        categoriaServico VARCHAR (60) NOT NULL,
+                        Quantidade INT NOT NULL,
+                        idVeiculo INT NOT NULL,
+                        valorServico FLOAT
+                        );
+                        
+                        
+CREATE TABLE veiculo (
+						idVeiculo INT AUTO_INCREMENT PRIMARY KEY,
+                        placaVeiculo VARCHAR (10) NOT NULL,  
+                        modeloVeiculo VARCHAR (50) NOT NULL,
+                        idClienteVeiculo INT,
+                        CONSTRAINT fk_idcliente_veiculo FOREIGN KEY (idClienteVeiculo) REFERENCES cliente (idCliente),
+                        CONSTRAINT unique_placa UNIQUE (placaVeiculo)
+                        );
+
+
+CREATE TABLE cliente (
+						idCliente INT AUTO_INCREMENT PRIMARY KEY,
+                        nomeCliente VARCHAR (60) NOT NULL,
+                        CPFcliente CHAR (9) NOT NULL,
+                        ContatoCliente CHAR(11) NOT NULL,
+                        enderecoCliente VARCHAR (60) NOT NULL
+                        );
+
+
+CREATE TABLE orcamento (
+						idOrcamento INT AUTO_INCREMENT PRIMARY KEY,
+                        dataOrcamento DATE,
+                        tipoServico VARCHAR (60) NOT NULL,
+                        orcamentoGerado FLOAT,
+                        statusOrcamento ENUM ("Cancelado", "Confirmado", "Aguardando", "Iniciado", "Entregue", "Finalizado") DEFAULT "Aguardando",
+                        validadeOrcamento VARCHAR (15) DEFAULT "1 semana",
+                        orcamento_idVeiculo INT,
+                        orcamento_idCliente INT,
+                        orcamento_idServico INT,
+                        orcamento_idMecanico INT,
+                        orcamento_idPeca INT,
+                        CONSTRAINT fk_orcamento_idveiculo FOREIGN KEY (orcamento_idVeiculo) REFERENCES veiculo(idVeiculo),
+                        CONSTRAINT fk_orcamento_idcliente FOREIGN KEY (orcamento_idCliente) REFERENCES cliente(idCliente),
+                        CONSTRAINT fk_orcamento_idservico FOREIGN key (orcamento_idServico) REFERENCES servicos(idServico),
+                        CONSTRAINT fk_orcamento_idmecanico FOREIGN KEY (orcamento_idMecanico) REFERENCES mecanico(idMecanico),
+                        CONSTRAINT fk_orcamento_idpeca FOREIGN KEY (orcamento_idPeca) REFERENCES peca(idPeca)
+                        );
+
+
+CREATE TABLE peca(
+						idPeca INT AUTO_INCREMENT PRIMARY KEY,
+                        valorPeca FLOAT,
+                        quantidadPeca INT,
+                        estadoPecaAtual ENUM ("Troca", "Conserto") DEFAULT "Conserto"
+                        );
+
+
+CREATE TABLE ordemServico (
+						idOs INT AUTO_INCREMENT PRIMARY KEY,
+                        valor FLOAT NOT NULL,
+                        dataInicio DATE,
+                        dataEntrega DATE,
+                        statusOs ENUM ("Cancelado", "Confirmado", "Em processo") DEFAULT "Em processo",
+                        osidOrcamento INT,
+                        osidCliente INT,
+                        osidMecanico INT,
+                        osidServico INT,
+                        osidPeca INT,
+                        CONSTRAINT fk_os_idorcamento FOREIGN KEY (osidOrcamento) REFERENCES orcamento(idOrcamento),
+                        CONSTRAINT fk_os_idcliente FOREIGN KEY (osidCliente) REFERENCES cliente(idCliente),
+                        CONSTRAINT fk_os_idmecanico FOREIGN KEY (osidMecanico) REFERENCES mecanico(idMecanico),
+                        CONSTRAINT fk_os_idservico FOREIGN KEY (osidServico) REFERENCES servicos(idServico),
+                        CONSTRAINT fk_os_idPeca FOREIGN KEY (osidPeca) REFERENCES peca(idPeca)
+                        );
